@@ -68,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    "Chatify",
+                    "ChitChatter",
                     style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 32,
