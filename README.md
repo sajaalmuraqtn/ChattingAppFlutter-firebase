@@ -1,3 +1,3 @@
-# firebase_session
+# ChattingAppFlutter
 
 A new Flutter project.
