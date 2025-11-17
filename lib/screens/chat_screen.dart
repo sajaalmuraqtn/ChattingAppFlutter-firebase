@@ -1,16 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_session/screens/profile_screen.dart';
 import 'package:firebase_session/utils/appcolor.dart';
 import 'package:flutter/material.dart';
  
 class ChatScreen extends StatefulWidget {
   final String receivedName;
   final String receivedEmail;
+  final String receivedphone;
 
   const ChatScreen({
     super.key,
     required this.receivedName,
     required this.receivedEmail,
+    required this.receivedphone,
   });
 
   @override
@@ -84,7 +87,8 @@ class _ChatScreenState extends State<ChatScreen> {
           bottom: true,
           child: Column(
             children: [
-               Container(
+              // ------------------ Header ------------------
+              Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 color: Colors.transparent,
                 child: Row(
@@ -93,27 +97,57 @@ class _ChatScreenState extends State<ChatScreen> {
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 8),
-                    CircleAvatar(
-                      backgroundColor: Colors.white,
-                      child: Text(
-                        widget.receivedName[0].toUpperCase(),
-                        style: const TextStyle(color: Colors.black),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FriendProfileScreen(
+                              name: widget.receivedName,
+                              email: widget.receivedEmail,
+                              phone:widget.receivedphone
+                            ),
+                          ),
+                        );
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Text(
+                          widget.receivedName[0].toUpperCase(),
+                          style: const TextStyle(color: Colors.black),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      widget.receivedName,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FriendProfileScreen(
+                                name: widget.receivedName,
+                                email: widget.receivedEmail,
+                                phone:widget.receivedphone,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          widget.receivedName,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
 
-               Expanded(
+              // ------------------ Messages ------------------
+              Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Colors.white,
@@ -176,7 +210,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
 
-               Container(
+              // ------------------ Input Field ------------------
+              Container(
                 color: Colors.white,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

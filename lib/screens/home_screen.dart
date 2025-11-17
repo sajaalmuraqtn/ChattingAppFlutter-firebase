@@ -117,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       builder: (context) => ChatScreen(
                                         receivedName: user['displayName'],
                                         receivedEmail: user['email'],
+                                        receivedphone: user['phone'],
                                       ),
                                     ),
                                   );

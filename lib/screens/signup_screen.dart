@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_session/screens/home_screen.dart';
 import 'package:firebase_session/screens/login_screen.dart';
+import 'package:firebase_session/screens/home_screen.dart';
 import 'package:firebase_session/utils/appcolor.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +18,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -26,28 +27,66 @@ class _SignupScreenState extends State<SignupScreen> {
     usernameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 
-   void signupSubmit() async {
-    if (!_formKey.currentState!.validate()) return;
+  /// 🔹 تسجيل المستخدم وتخزين البيانات في Firestore
+ void signupSubmit() async {
+  if (!_formKey.currentState!.validate()) return;
 
-    try {
-      //package authentication هون عمل حساب بواسطة الدالة الموجودة في ال 
-      await _auth.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );   
+  try {
+    //  فحص إذا الإيميل موجود من قبل 
+    final emailExists = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: emailController.text.trim())
+        .get();
 
-      //authبنفس المعلومات اللي بال  collection Firestore تخزين بيانات المستخدم في
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_auth.currentUser!.uid)
-          .set({//collecation اضافة الحقول لل 
-            'uid': _auth.currentUser!.uid,
-            'email': _auth.currentUser!.email,
-            'displayName': usernameController.text,
-          });
+    if (emailExists.docs.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Email already exists! Try another email."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    //  فحص إذا رقم الهاتف موجود من قبل
+    final phoneExists = await FirebaseFirestore.instance
+        .collection('users')
+        .where('phone', isEqualTo: phoneController.text.trim())
+        .get();
+
+    if (phoneExists.docs.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Phone number already used!"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // 3️⃣ إنشاء المستخدم بالميل والباسورد
+    UserCredential userCredential =
+        await _auth.createUserWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+
+    User? user = userCredential.user;
+
+    if (user != null) {
+      user = _auth.currentUser;
+
+      // 4️⃣ تخزين بيانات المستخدم في Firestore
+      await FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
+        'uid': user.uid,
+        'email': user.email,
+        'displayName': usernameController.text.trim(),
+        'phone': phoneController.text.trim(),
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -56,17 +95,22 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
 
+      // 5️⃣ الانتقال للصفحة الرئيسية
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-    } catch (e) {
-      print(e);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
+  } catch (e) {
+    print(e);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Error: ${e.toString()}"),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
 
   // 🔹 Validators
   String? usernameValidator(String? value) {
@@ -94,6 +138,18 @@ class _SignupScreenState extends State<SignupScreen> {
     return null;
   }
 
+String? phoneValidator(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Please enter phone number';
+  }
+
+  // تحقق أن الرقم يحتوي فقط على أرقام وطوله 10 أرقام
+  if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+    return 'Phone number must be exactly 10 digits';
+  }
+
+  return null;
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +162,6 @@ class _SignupScreenState extends State<SignupScreen> {
             end: Alignment.bottomRight,
           ),
         ),
-
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -115,7 +170,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 children: [
                   const Icon(Icons.person_add, size: 90, color: Colors.white),
                   const SizedBox(height: 16),
-
                   const Text(
                     'Create Account',
                     style: TextStyle(
@@ -124,15 +178,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       color: Colors.white,
                     ),
                   ),
-
                   const SizedBox(height: 40),
 
                   // ---------------------- White Card ----------------------
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 25,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -144,7 +195,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ],
                     ),
-
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -184,6 +234,19 @@ class _SignupScreenState extends State<SignupScreen> {
                               border: OutlineInputBorder(),
                             ),
                             validator: passwordValidator,
+                          ),
+                          const SizedBox(height: 12),
+
+                          // PHONE
+                          TextFormField(
+                            controller: phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: const InputDecoration(
+                              labelText: 'Phone Number',
+                              prefixIcon: Icon(Icons.phone),
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: phoneValidator,
                           ),
                           const SizedBox(height: 20),
 
@@ -226,8 +289,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const LoginScreen(),
-                            ),
+                                builder: (context) => const LoginScreen()),
                           );
                         },
                         child: const Text(
