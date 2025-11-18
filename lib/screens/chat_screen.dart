@@ -32,6 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void getCred() {
     signedUser = _auth.currentUser!;
     // إنشاء chatId ثابت بين المستخدمين
+    // بين المرسل الحالي والمستقبل اللي انا بدي ارسللو
     chatId = signedUser.email!.compareTo(widget.receivedEmail) < 0
         ? "${signedUser.email}_${widget.receivedEmail}"
         : "${widget.receivedEmail}_${signedUser.email}";
@@ -87,8 +88,7 @@ class _ChatScreenState extends State<ChatScreen> {
           bottom: true,
           child: Column(
             children: [
-              // ------------------ Header ------------------
-              Container(
+               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 color: Colors.transparent,
                 child: Row(
@@ -103,6 +103,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => FriendProfileScreen(
+                              ismy: false,
                               name: widget.receivedName,
                               email: widget.receivedEmail,
                               phone:widget.receivedphone
@@ -126,6 +127,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => FriendProfileScreen(
+                                ismy: false,
                                 name: widget.receivedName,
                                 email: widget.receivedEmail,
                                 phone:widget.receivedphone,
@@ -146,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
 
-              // ------------------ Messages ------------------
+              // الرسائل
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(

@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_session/screens/login_screen.dart';
+import 'package:firebase_session/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
-import 'chat_screen.dart';
 import 'package:firebase_session/utils/appcolor.dart';
+ import 'chat_screen.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final currentUser = snapshot.data!;
 
         return Scaffold(
-           body: Container(
+          body: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [AppColors.primary, AppColors.secondary],
@@ -38,13 +39,50 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SafeArea(
               child: Column(
                 children: [
-                   Container(
+                  // ---------- Top Header ----------
+                  Container(
                     height: kToolbarHeight,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Icon(Icons.chat, color: Colors.white),
+                        GestureDetector(
+                          onTap: () async {
+                            // جلب بيانات المستخدم من Firestore
+                            final doc = await _firestore
+                                .collection('users')
+                                .doc(currentUser.uid)
+                                .get();
+
+                            final data = doc.data();
+                            if (data != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FriendProfileScreen(
+                                    ismy: true,
+                                    name: data['displayName'] ?? 'No Name',
+                                    email: data['email'] ?? 'No Email',
+                                    phone: data['phone'] ?? 'No Phone',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Text(
+                              (currentUser.displayName != null &&
+                                      currentUser.displayName!.isNotEmpty)
+                                  ? currentUser.displayName![0].toUpperCase()
+                                  : (currentUser.email != null &&
+                                          currentUser.email!.isNotEmpty)
+                                      ? currentUser.email![0].toUpperCase()
+                                      : '?',
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        ),
                         const Text(
                           'Friends',
                           style: TextStyle(
@@ -64,7 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 8),
 
-                   Expanded(
+                  // ---------- Users List ----------
+                  Expanded(
                     child: StreamBuilder<QuerySnapshot>(
                       stream: _firestore.collection('users').snapshots(),
                       builder: (context, userSnapshot) {
@@ -94,6 +133,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemCount: users.length,
                           itemBuilder: (context, index) {
                             final user = users[index];
+                            final displayName =
+                                user['displayName'] ?? 'No Name';
+                            final email = user['email'] ?? 'No Email';
+                            final phone = user['phone'] ?? 'No Phone';
 
                             return Card(
                               margin: const EdgeInsets.symmetric(vertical: 6),
@@ -104,20 +147,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                 leading: CircleAvatar(
                                   backgroundColor: AppColors.secondary,
                                   child: Text(
-                                    user['displayName'][0].toUpperCase(),
-                                    style: const TextStyle(color: Colors.white),
+                                    displayName.isNotEmpty
+                                        ? displayName[0].toUpperCase()
+                                        : '?',
+                                    style:
+                                        const TextStyle(color: Colors.white),
                                   ),
                                 ),
-                                title: Text(user['displayName']),
-                                subtitle: Text(user['email']),
+                                title: Text(displayName),
+                                subtitle: Text(email),
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ChatScreen(
-                                        receivedName: user['displayName'],
-                                        receivedEmail: user['email'],
-                                        receivedphone: user['phone'],
+                                        receivedName: displayName,
+                                        receivedEmail: email,
+                                        receivedphone: phone,
                                       ),
                                     ),
                                   );

@@ -5,12 +5,15 @@ class FriendProfileScreen extends StatelessWidget {
   final String name;
   final String email;
   final String phone;
+  
+  bool ismy;
 
-  const FriendProfileScreen({
+    FriendProfileScreen({
     super.key,
     required this.name,
     required this.email,
     required this.phone,
+    required this.ismy
   });
 
   @override
@@ -18,16 +21,16 @@ class FriendProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // 👈 شفاف
+        backgroundColor: Colors.transparent, 
         elevation: 0,
-        title: const Text(
-          'Friend Profile',
-          style: TextStyle(color: AppColors.textLight),
+        title: Text(
+          '${ismy?'My':  'Friend'} Profile',
+          style: const TextStyle(color: AppColors.textLight),
         ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: AppColors.textLight),
       ),
-      extendBodyBehindAppBar: true, // 👈 مهم لظهور الخلفية خلف الـ AppBar
+      extendBodyBehindAppBar: true, 
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -56,7 +59,7 @@ class FriendProfileScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Avatar Circle
+                // الصورة الافتراضية
                 CircleAvatar(
                   radius: 40,
                   backgroundColor: AppColors.secondary,
@@ -109,14 +112,14 @@ class FriendProfileScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 20),
+ 
+                SizedBox(height:ismy?0: 20),
 
                 // Chat button
                 SizedBox(
                   width: double.infinity,
-                  height: 45,
-                  child: ElevatedButton.icon(
+                  height:ismy?0: 45,
+                  child:ismy?null: ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
                     },
