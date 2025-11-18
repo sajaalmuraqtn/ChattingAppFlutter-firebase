@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_session/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_session/utils/appcolor.dart';
- import 'chat_screen.dart';
+import 'chat_screen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+   String searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         GestureDetector(
                           onTap: () async {
-                            // جلب بيانات المستخدم من Firestore
+                            // Fetch user data from Firestore
                             final doc = await _firestore
                                 .collection('users')
                                 .doc(currentUser.uid)
@@ -102,8 +104,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 8),
 
-                  // ---------- Users List ----------
-                  Expanded(
+                  // ---------------- Search Bar ----------------
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value.toLowerCase();
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Search by name or email...",
+                        filled: true,
+                        fillColor: Colors.white,
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                   Expanded(
                     child: StreamBuilder<QuerySnapshot>(
                       stream: _firestore.collection('users').snapshots(),
                       builder: (context, userSnapshot) {
@@ -115,9 +139,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }
 
-                        final users = userSnapshot.data!.docs
-                            .where((doc) => doc['uid'] != currentUser.uid)
-                            .toList();
+                         final users = userSnapshot.data!.docs.where((doc) {
+                          if (doc['uid'] == currentUser.uid) return false;
+
+                          final name =
+                              (doc['displayName'] ?? '').toLowerCase();
+                          final email = (doc['email'] ?? '').toLowerCase();
+
+                          return name.contains(searchQuery) ||
+                              email.contains(searchQuery);
+                        }).toList();
 
                         if (users.isEmpty) {
                           return const Center(

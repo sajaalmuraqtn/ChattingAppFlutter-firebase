@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_session/screens/profile_screen.dart';
 import 'package:firebase_session/utils/appcolor.dart';
 import 'package:flutter/material.dart';
- 
+
 class ChatScreen extends StatefulWidget {
   final String receivedName;
   final String receivedEmail;
@@ -42,11 +42,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = textmessageController.text.trim();
     if (text.isEmpty) return;
 
-    await _firestore
-        .collection('messages')
-        .doc(chatId)
-        .collection("chat")
-        .add({
+    await _firestore.collection('messages').doc(chatId).collection("chat").add({
       'text': text,
       'sender': signedUser.email,
       'received': widget.receivedEmail,
@@ -76,7 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       body: Container(
+      body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [AppColors.primary, AppColors.secondary],
@@ -88,8 +84,11 @@ class _ChatScreenState extends State<ChatScreen> {
           bottom: true,
           child: Column(
             children: [
-               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 color: Colors.transparent,
                 child: Row(
                   children: [
@@ -106,7 +105,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               ismy: false,
                               name: widget.receivedName,
                               email: widget.receivedEmail,
-                              phone:widget.receivedphone
+                              phone: widget.receivedphone,
                             ),
                           ),
                         );
@@ -130,7 +129,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ismy: false,
                                 name: widget.receivedName,
                                 email: widget.receivedEmail,
-                                phone:widget.receivedphone,
+                                phone: widget.receivedphone,
                               ),
                             ),
                           );
@@ -138,9 +137,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Text(
                           widget.receivedName,
                           style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -153,8 +153,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
                   ),
                   child: StreamBuilder<QuerySnapshot>(
                     stream: _firestore
@@ -165,8 +166,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
-                        return const Center(
-                            child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       }
 
                       final messages = snapshot.data!.docs;
@@ -188,21 +188,71 @@ class _ChatScreenState extends State<ChatScreen> {
                             alignment: isMe
                                 ? Alignment.centerRight
                                 : Alignment.centerLeft,
-                            child: Container(
-                              margin:
-                                  const EdgeInsets.symmetric(vertical: 4),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 14),
-                              decoration: BoxDecoration(
-                                color: isMe
-                                    ? AppColors.chatMe
-                                    : AppColors.chatOther,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                msg['text'],
-                                style: const TextStyle(fontSize: 16),
-                              ),
+                            child: Column(
+                              crossAxisAlignment: isMe
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
+                              children: [
+                                // اسم المرسل
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 4,
+                                    right: 4,
+                                    bottom: 2,
+                                  ),
+                                  child: Text(
+                                    isMe ? "You" : widget.receivedName,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+
+                                // فقاعة الرسالة
+                                Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 3,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                    horizontal: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isMe
+                                        ? AppColors.chatMe
+                                        : AppColors.chatOther,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    msg['text'],
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+
+                                // الوقت والتاريخ
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 4,
+                                    right: 4,
+                                    top: 2,
+                                  ),
+                                  child: Text(
+                                    msg['timestamp'] != null
+                                        ? "${DateTime.fromMillisecondsSinceEpoch(msg['timestamp'].millisecondsSinceEpoch).hour.toString().padLeft(2, '0')}:"
+                                              "${DateTime.fromMillisecondsSinceEpoch(msg['timestamp'].millisecondsSinceEpoch).minute.toString().padLeft(2, '0')}  "
+                                              "${DateTime.fromMillisecondsSinceEpoch(msg['timestamp'].millisecondsSinceEpoch).day}/"
+                                              "${DateTime.fromMillisecondsSinceEpoch(msg['timestamp'].millisecondsSinceEpoch).month}/"
+                                              "${DateTime.fromMillisecondsSinceEpoch(msg['timestamp'].millisecondsSinceEpoch).year}"
+                                        : "",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         },
@@ -215,8 +265,10 @@ class _ChatScreenState extends State<ChatScreen> {
               // ------------------ Input Field ------------------
               Container(
                 color: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -227,10 +279,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           fillColor: Colors.grey[100],
                           filled: true,
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none),
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                         onSubmitted: (_) => _sendMessage(),
                       ),
@@ -248,7 +303,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
