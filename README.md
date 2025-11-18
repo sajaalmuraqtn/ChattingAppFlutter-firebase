@@ -48,6 +48,4 @@ The app allows users to sign up, log in, browse registered users, chat in real t
 
 ## 📱 Screens Preview
 
-Below is a preview from the app (replace with your actual image):
-
 ![App Preview](assets/screenview.png)
