@@ -193,8 +193,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   ? CrossAxisAlignment.end
                                   : CrossAxisAlignment.start,
                               children: [
-                                // اسم المرسل
-                                Padding(
+                                 Padding(
                                   padding: const EdgeInsets.only(
                                     left: 4,
                                     right: 4,
@@ -210,8 +209,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   ),
                                 ),
 
-                                // فقاعة الرسالة
-                                Container(
+                                 Container(
                                   margin: const EdgeInsets.symmetric(
                                     vertical: 3,
                                   ),
@@ -262,8 +260,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
 
-              // ------------------ Input Field ------------------
-              Container(
+               Container(
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
