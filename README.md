@@ -45,7 +45,7 @@ The app allows users to sign up, log in, browse registered users, chat in real t
   - Instant message sending
   - Auto-scroll to the latest message
 ---
-🔗 **Live Demo:** https://drive.google.com/drive/folders/1n2kuYGhqCk8CVaLWqxc3fBpcMzKHKh6Y?usp=drive_link  
+🔗 **Live Demo:** https://drive.google.com/drive/folders/1qR4Wimm9nEXVxkWtuSTuVtC6Yca8hTFt  
 
 ## 📱 Screens Preview
 
